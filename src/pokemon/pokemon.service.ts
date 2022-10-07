@@ -10,12 +10,14 @@ import { Pokemon } from './entities/pokemon.entity';
 
 import { CreatePokemonDto } from './dto/create-pokemon.dto';
 import { UpdatePokemonDto } from './dto/update-pokemon.dto';
+import { PaginationDto } from 'src/common/dto';
 
 @Injectable()
 export class PokemonService {
   constructor(
     @InjectModel(Pokemon.name) private readonly pokemonModel: Model<Pokemon>,
   ) {}
+
   async create(createPokemonDto: CreatePokemonDto) {
     createPokemonDto.name = createPokemonDto.name.toLowerCase();
     try {
@@ -26,8 +28,14 @@ export class PokemonService {
     }
   }
 
-  findAll() {
-    return this.pokemonModel.find().exec();
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+    return this.pokemonModel
+      .find()
+      .limit(limit)
+      .skip(offset)
+      .sort({ no: 1 })
+      .select('-__v');
   }
 
   async findOne(term: string) {
